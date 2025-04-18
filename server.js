@@ -25,8 +25,13 @@ try {
     axios.post(`${PESAPAL_URL}/Auth/RequestToken`, credentials);
     return response.data.token;
 } catch (error) {
-    console.error("Error getting Pesapal token:", error.response.data);
-}
+    if (error.response) {
+        console.error("Pesapal API error:", error.response.data);
+    } else if (error.request) {
+        console.error("No response received from Pesapal:", error.request);
+    } else {
+        console.error("Unexpected error:", error.message);
+    }
 // create payment request.
 app.post('/pay', async (req, res) => {
     const { amount, email, } = req.body;
@@ -82,14 +87,10 @@ app.get('/payment-status/:order_id', async (req, res) => {
         );
         res.json(response.data);
     } catch (error) {
-        if (error.response) {
-            console.error("Pesapal API error:", error.response.data);
-        } else if (error.request) {
-            console.error("No response received from Pesapal:", error.request);
-        } else {
-            console.error("Unexpected error:", error.message);
-        }
-        
+        console.error("Error checking transaction status:",
+            error.response.data
+        );
+        res.status(500).json({error:"Could not check status"});
     }
 })
 
@@ -97,4 +98,4 @@ app.get('/payment-status/:order_id', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-}); 
+})}; 
