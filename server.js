@@ -82,10 +82,14 @@ app.get('/payment-status/:order_id', async (req, res) => {
         );
         res.json(response.data);
     } catch (error) {
-        console.error("Error checking transaction status:",
-            error.response.data
-        );
-        res.status(500).json({error:"Could not check status"});
+        if (error.response) {
+            console.error("Pesapal API error:", error.response.data);
+        } else if (error.request) {
+            console.error("No response received from Pesapal:", error.request);
+        } else {
+            console.error("Unexpected error:", error.message);
+        }
+        
     }
 })
 
