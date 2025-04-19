@@ -20,17 +20,17 @@ async function getPesapalToken(){
         consumer_key: consumerKey,
         consumer_secret: consumerSecret
     };
+    try {
+        const response = await
+        axios.post(`${PESAPAL_URL}/Auth/RequestToken`, credentials,{
+            headers: {
+                'Content-Type':
+                'application/json'
+            }
+        });
+        return response.data.token;
 }
-try {
-    const response = await
-    axios.post(`${PESAPAL_URL}/Auth/RequestToken`, credentials,{
-        headers: {
-            'Content-Type':
-            'application/json'
-        }
-    });
-    return response.data.token;
-} catch (error) {
+catch (error) {
     if (error.response) {
         console.error("Pesapal API error:", error.response.data);
     } else if (error.request) {
@@ -38,6 +38,7 @@ try {
     } else {
         console.error("Unexpected error:", error.message);
     }
+}} 
 // create payment request.
 app.post('/pay', async (req, res) => {
     const { amount, email, } = req.body;
@@ -120,4 +121,4 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-})}; 
+}); 
