@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 app.use(bodyParser.json());
 
 const PESAPAL_URL = process.env.PESAPAL_API_URL;
@@ -22,7 +23,12 @@ async function getPesapalToken(){
 }
 try {
     const response = await
-    axios.post(`${PESAPAL_URL}/Auth/RequestToken`, credentials);
+    axios.post(`${PESAPAL_URL}/Auth/RequestToken`, credentials,{
+        headers: {
+            'Content-Type':
+            'application/json'
+        }
+    });
     return response.data.token;
 } catch (error) {
     if (error.response) {
@@ -92,6 +98,22 @@ app.get('/payment-status/:order_id', async (req, res) => {
         );
         res.status(500).json({error:"Could not check status"});
     }
+})
+
+// Route to get access token
+app.get('/token', async (req, res) => {
+    const token = await
+    getPesapalToken();
+    if (token) {
+        res.json({ token });
+    } else {
+        res.status(500).json({ error: "Failed to get token"});
+    }
+});
+
+// Root route
+app.get('/', (req, res) => {
+    res.send('Pesapal backend is working');
 })
 
 // start server.
