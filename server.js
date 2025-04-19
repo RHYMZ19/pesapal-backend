@@ -14,8 +14,16 @@ const consumerKey = process.env.PESAPAL_CONSUMER_KEY;
 const consumerSecret = process.env.PESAPAL_CONSUMER_SECRET;
 const callbackURL =  process.env.PESAPAL_CALLBACK_URL;
 
+let accessToken = null;
+let tokenExpiry = null;
+
 //GET PESAPAL TOKEN.
 async function getPesapalToken(){
+    const now = Date.now();
+    // use access token if still valid.
+    if (accessToken && tokenExpiry && now < tokenExpiry) {
+        return accessToken;
+    }
     const credentials = {
         consumer_key: consumerKey,
         consumer_secret: consumerSecret
@@ -28,6 +36,8 @@ async function getPesapalToken(){
                 'application/json'
             }
         });
+        accessToken = response.data.token;
+        tokenExpiry = now + (4 * 60 * 1000);// token valid for 4 mins for safety.
         return response.data.token;
 }
 catch (error) {
@@ -41,7 +51,7 @@ catch (error) {
 }} 
 // create payment request.
 app.post('/pay', async (req, res) => {
-    const { amount, email, } = req.body;
+    const { amount, email } = req.body;
     const token = await
     getPesapalToken();
 
@@ -63,7 +73,7 @@ app.post('/pay', async (req, res) => {
     };
     try {
         const response = await
-        post(`${PESAPAL_URL}/Transactions/SubmitOrderRequest`,
+        axios.post(`${PESAPAL_URL}api/Transactions/SubmitOrderRequest`,
             orderDetails, {
                 headers: {Authorization: `Bearer ${token}`}
             }
