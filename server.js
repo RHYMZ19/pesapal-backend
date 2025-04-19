@@ -22,7 +22,7 @@ async function getPesapalToken(){
     };
     try {
         const response = await
-        post(`${PESAPAL_URL}/Auth/RequestToken`, credentials,{
+        axios.post(`${PESAPAL_URL}/Auth/RequestToken`, credentials,{
             headers: {
                 'Content-Type':
                 'application/json'
