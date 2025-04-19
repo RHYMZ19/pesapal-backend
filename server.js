@@ -1,13 +1,13 @@
 require('dotenv').config();
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+import express, { json } from 'express';
+import { post, get } from 'axios';
+import cors from 'cors';
+import { json as _json } from 'body-parser';
 
 const app = express();
 app.use(cors());
-app.use(express.json());
-app.use(bodyParser.json());
+app.use(json());
+app.use(_json());
 
 const PESAPAL_URL = process.env.PESAPAL_API_URL;
 const consumerKey = process.env.PESAPAL_CONSUMER_KEY;
@@ -22,7 +22,7 @@ async function getPesapalToken(){
     };
     try {
         const response = await
-        axios.post(`${PESAPAL_URL}/Auth/RequestToken`, credentials,{
+        post(`${PESAPAL_URL}/Auth/RequestToken`, credentials,{
             headers: {
                 'Content-Type':
                 'application/json'
@@ -63,7 +63,7 @@ app.post('/pay', async (req, res) => {
     };
     try {
         const response = await
-        axios.post(`${PESAPAL_URL}/Transactions/SubmitOrderRequest`,
+        post(`${PESAPAL_URL}/Transactions/SubmitOrderRequest`,
             orderDetails, {
                 headers: {Authorization: `Bearer ${token}`}
             }
@@ -84,7 +84,7 @@ app.get('/payment-status/:order_id', async (req, res) => {
     
     try {
         const response = await
-        axios.get(
+        get(
             `${PESAPAL_URL}/Transactions/GetTransactionStatus?
             orderTrackingId=${orderID}`,
             {
