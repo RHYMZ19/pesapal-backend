@@ -1,13 +1,13 @@
 require('dotenv').config();
-import express, { json } from 'express';
-import { post, get } from 'axios';
-import cors from 'cors';
-import { json as _json } from 'body-parser';
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const app = express();
 app.use(cors());
-app.use(json());
-app.use(_json());
+app.use(bodyParser.json());
+
 
 const PESAPAL_URL = process.env.PESAPAL_API_URL;
 const consumerKey = process.env.PESAPAL_CONSUMER_KEY;
