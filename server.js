@@ -73,14 +73,21 @@ app.post('/pay', async (req, res) => {
     };
     try {
         const response = await
-        axios.post(`${PESAPAL_URL}api/Transactions/SubmitOrderRequest`,
+        axios.post(`${PESAPAL_URL}/v3/api/Transactions/SubmitOrderRequest`,
             orderDetails, {
-                headers: {Authorization: `Bearer ${token}`}
+                headers: {Authorization: `Bearer ${accessToken}`,
+            "Content-Type": 
+        "application/json"}
             }
         );
-        res.json({ payment_url:
-            response.data.redirect_url
-        });
+        const {
+            redirect_url, order_tracking_id 
+        } = response.data;
+        console.log("Redirect user to:", redirect_url);
+        return {
+            redirect_url, order_tracking_id
+        }
+        
     } catch (error) {
         console.error("Payment error:", error.response.data);
         res.status(500).json({error: "Payment failed"});
