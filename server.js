@@ -63,7 +63,7 @@ app.post('/pay', async (req, res) => {
         amount: amount,
         description: "Buying coins in chat app",
         callback_url: callbackURL,
-        Notification_id: "YOUR NOTIFICATION ID",
+        Notification_id: "f1d363c3-d803-4529-b209-dbdfacd3c8b5",
         billing_address: {
             email_address: email,
             phone_number:phone,
@@ -119,37 +119,6 @@ app.get('/payment-status/:order_id', async (req, res) => {
     }
 });
 
-const ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3VzZXJkYXRhIjoiMzUzYzEzZjAtNDhiZC00MWNmLWE3YTctZGMwNWQ1MGFlZDUyIiwidWlkIjoiTWxzaWxFS005VzlQbnRRa0FiazAybE9WOU50bWpQSzUiLCJuYmYiOjE3NDUxMjkxNjUsImV4cCI6MTc0NTEyOTQ2NSwiaWF0IjoxNzQ1MTI5MTY1LCJpc3MiOiJodHRwOi8vcGF5LnBlc2FwYWwuY29tLyIsImF1ZCI6Imh0dHA6Ly9wYXkucGVzYXBhbC5jb20vIn0.nz_9nD7cPABOzE946_sGExrg8-8fX32FgfczBJyBjjQ";
-
-async function getNotificationID() {
-    const url = "https://pay.pesapal.com/v3/api/Notification/Listener";
-
-    try {
-        const response = await axios.get(url, {
-            headers: {
-                Authorization: `Bearer ${ACCESS_TOKEN}`
-            }
-        });
-        const Listeners = response.data;
-
-        if(Listeners.length === 0) {
-            console.log(
-                "No notification URLs found. make sure you have registered one in your dashboard."
-            );
-            return;
-        }
-        Listeners.forEach((Listener, index) => {
-            console.log(`\nNotification 
-                Listener ${index + 1}:`);
-                console.log(`Notification ID: ${Listener.id}`);
-                console.log(`IPN Listener URL: ${Listener.url}`);
-                console.log(`Status: ${Listener.status}`);
-        });
-    } catch (error) {
-        console.error("Failed to fetch Notification ID:", error.response?.data || error.message);
-    }
-}
-getNotificationID();
 
 // payment callback.
 app.post('/payment-callback', (req, res) => {
