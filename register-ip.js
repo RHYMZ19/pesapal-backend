@@ -9,7 +9,7 @@ const registerIPN = async () => {
         url: "https://pesapal-backend-xy2z.onrender.com/payment-callback",
         ipn_notification_type: "GET"
     };
-    try {
+    try { 
         const response = await
         axios.post(url, data, {
             headers: {
