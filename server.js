@@ -14,6 +14,7 @@ const PESAPAL_URL = process.env.PESAPAL_API_URL;
 const consumerKey = process.env.PESAPAL_CONSUMER_KEY;
 const consumerSecret = process.env.PESAPAL_CONSUMER_SECRET;
 const callbackURL =  process.env.PESAPAL_CALLBACK_URL;
+const phone = "0743878261";
 
 let accessToken = null;
 let tokenExpiry = null;
@@ -58,18 +59,23 @@ app.post('/pay', async (req, res) => {
 
     const orderDetails = {
         id: "ORDER-" + new
-        Data().getTime(),
+        Date().getTime(),
         currency: "USD",
         amount: amount,
         description: "Buying coins in chat app",
         callback_url: callbackURL,
-        Notification_id: "f1d363c3-d803-4529-b209-dbdfacd3c8b5",
+        notification_id: "f1d363c3-d803-4529-b209-dbdfacd3c8b5",
         billing_address: {
             email_address: email,
             phone_number:phone,
             country_code: "KE",
             first_name: "Ssenabulya",
-            last_name: "Rahim"
+            last_name: "Rahim",
+            line_1: "Street 123",
+            city: "Kampala",
+            state: "Central",
+            postal_code: "00100",
+            zip_code: "00100"
         }
     };
     try {
