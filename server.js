@@ -54,7 +54,7 @@ catch (error) {
 // create payment request.
 app.post('/pay', async (req, res) => {
     const { amount, email } = req.body;
-    const token = await
+    const accessToken = await
     getPesapalToken();
 
     const orderDetails = {
@@ -91,9 +91,9 @@ app.post('/pay', async (req, res) => {
             redirect_url, order_tracking_id 
         } = response.data;
         console.log("Redirect user to:", redirect_url);
-        return {
+        res.json ({
             redirect_url, order_tracking_id
-        }
+        });
         
     } catch (error) {
         console.error("Payment error:", error.response.data);
@@ -107,7 +107,7 @@ app.get('/payment-status/:order_id', async (req, res) => {
     const orderID = req.params.order_id;
     
     try {
-        const response = await
+        const response = await axios.
         get(
             `${PESAPAL_URL}/Transactions/GetTransactionStatus?
             orderTrackingId=${orderID}`,
@@ -119,7 +119,7 @@ app.get('/payment-status/:order_id', async (req, res) => {
         res.json(response.data);
     } catch (error) {
         console.error("Error checking transaction status:",
-            error.response.data
+            error.response?.data || error.message
         );
         res.status(500).json({error:"Could not check status"});
     }
