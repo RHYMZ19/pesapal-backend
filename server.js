@@ -54,6 +54,7 @@ catch (error) {
 // create payment request.
 app.post('/pay', async (req, res) => {
     console.log("Recieved /pay request");
+    console.log("Request body:", req.body);
     const { amount, email } = req.body;
     const accessToken = await
     getPesapalToken();
