@@ -80,6 +80,7 @@ app.post('/pay', async (req, res) => {
         }
     };
     try {
+        console.log("Submitting order to Pesapal...");
         const response = await
         axios.post(`${PESAPAL_URL}/v3/api/Transactions/SubmitOrderRequest`,
             orderDetails, {
@@ -97,7 +98,7 @@ app.post('/pay', async (req, res) => {
         });
         
     } catch (error) {
-        console.error("Payment error:", error.response.data);
+        console.error("Payment error:", error?.response?.data || error.message);
         res.status(500).json({error: "Payment failed"});
     }
 });
