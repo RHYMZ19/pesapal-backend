@@ -53,6 +53,7 @@ catch (error) {
 }} 
 // create payment request.
 app.post('/pay', async (req, res) => {
+    console.log("Pesapal response:", express.response.data);
     console.log("Recieved /pay request");
     const { amount, email } = req.body;
     console.log("Request body:", req.body);
@@ -69,8 +70,8 @@ app.post('/pay', async (req, res) => {
         callback_url: callbackURL,
         notification_id: "f1d363c3-d803-4529-b209-dbdfacd3c8b5",
         billing_address: {
-            email_address: email,
-            phone_number:phone,
+            email_address: "rahim@gmail.com",
+            phone_number:"0743878261",
             country_code: "KE",
             first_name: "Ssenabulya",
             last_name: "Rahim",
