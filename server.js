@@ -54,11 +54,12 @@ catch (error) {
 // create payment request.
 app.post('/pay', async (req, res) => {
     console.log("Recieved /pay request");
-    console.log("Request body:", req.body);
     const { amount, email } = req.body;
+    console.log("Request body:", req.body);
+    try {
     const accessToken = await
     getPesapalToken();
-
+    console.log("Access token:", accessToken);
     const orderDetails = {
         id: "ORDER-" + new
         Date().getTime(),
@@ -80,8 +81,8 @@ app.post('/pay', async (req, res) => {
             zip_code: "00100"
         }
     };
-    try {
-        console.log("Submitting order to Pesapal...");
+    
+        
         const response = await
         axios.post(`${PESAPAL_URL}/v3/api/Transactions/SubmitOrderRequest`,
             orderDetails, {
