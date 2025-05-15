@@ -93,8 +93,9 @@ app.post('/pay', async (req, res) => {
             }
         );
         const {
-            redirect_url, order_tracking_id 
-        } = response.data;
+            redirect_url, 
+            order_tracking_id } = 
+            response.data;
         console.log("Redirect user to:", redirect_url);
         res.json ({
             redirect_url, order_tracking_id
