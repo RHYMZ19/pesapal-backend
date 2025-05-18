@@ -53,7 +53,7 @@ catch (error) {
 }} 
 // create payment request.
 app.post('/pay', async (req, res) => {
-    console.log("Pesapal response:", response.data);
+    
     console.log("Recieved /pay request");
     const { amount, email } = req.body;
     console.log("Request body:", req.body);
@@ -92,6 +92,7 @@ app.post('/pay', async (req, res) => {
         "application/json"}
             }
         );
+        console.log("Pesapal response:", response.data);
         const {
             redirect_url, 
             order_tracking_id } = 
