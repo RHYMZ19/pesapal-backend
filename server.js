@@ -5,6 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
@@ -16,14 +17,14 @@ const consumerSecret = process.env.PESAPAL_CONSUMER_SECRET;
 const callbackURL =  process.env.PESAPAL_CALLBACK_URL;
 const phone = "0743878261";
 
-let accessToken = null;
-let tokenExpiry = null;
+let accessToken = '';
+let tokenExpiry = 0;
 
 //GET PESAPAL TOKEN.
 async function getPesapalToken(){
     const now = Date.now();
     // use access token if still valid.
-    if (accessToken && tokenExpiry && now < tokenExpiry) {
+    if (accessToken && tokenExpiry > now ) {
         return accessToken;
     }
     const credentials = {
@@ -39,31 +40,27 @@ async function getPesapalToken(){
             }
         });
         accessToken = response.data.token;
-        tokenExpiry = now + (4 * 60 * 1000);// token valid for 4 mins for safety.
-        return response.data.token;
+        tokenExpiry = now + 4 * 60 * 1000;// token valid for 4 mins for safety.
+        return accessToken;
 }
 catch (error) {
-    if (error.response) {
-        console.error("Pesapal API error:", error.response.data);
-    } else if (error.request) {
-        console.error("No response received from Pesapal:", error.request);
-    } else {
-        console.error("Unexpected error:", error.message);
-    }
+    console.error("Error getting access token:", error?.response?.data || error.message);
+    throw new Error('Failed to get access token');
 }} 
 // create payment request.
 app.post('/pay', async (req, res) => {
-    
-    console.log("Recieved /pay request");
-    const { amount, email } = req.body;
-    console.log("Request body:", req.body);
-    try {
+    try{
+        const { amount, email } = 
+        req.body;
+        if (!amount || !email) {
+            return
+            res.status(400).json({error: "Amount and email are required"})
+        };
+    console.log('Recieved /pay request:', req.body);
     const accessToken = await
     getPesapalToken();
-    console.log("Access token:", accessToken);
     const orderDetails = {
-        id: "ORDER-" + new
-        Date().getTime(),
+        id: "ORDER-" + Date.now(),
         currency: "USD",
         amount: amount,
         description: "Buying coins in chat app",
@@ -158,7 +155,8 @@ app.get('/', (req, res) => {
 })
 
 // start server.
-const PORT = process.env.PORT || 10000;
+
 app.listen(PORT, () => {
+    const PORT = process.env.PORT || 10000;
     console.log(`Server running on port ${PORT}`);
 }); 
