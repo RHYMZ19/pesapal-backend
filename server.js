@@ -50,25 +50,26 @@ catch (error) {
 // create payment request.
 app.post('/pay', async (req, res) => {
     try{
-        const { amount, email } = 
+        const { amount, email, phone, orderTrackingId } = 
         req.body;
-        if (!amount || !email) {
+        if (!amount || !email || !phone) {
             return
-            res.status(400).json({error: "Amount and email are required"})
+            res.status(400).json({error: "Amount and email and phone are required"})
         };
     console.log('Recieved /pay request:', req.body);
     const accessToken = await
     getPesapalToken();
+    const orderID = 'order' + Date.now();
     const orderDetails = {
-        id: "ORDER-" + Date.now(),
+        id: orderID,
         currency: "USD",
-        amount: amount,
+        amount: req.body.amount,
         description: "Buying coins in chat app",
         callback_url: callbackURL,
         notification_id: "f1d363c3-d803-4529-b209-dbdfacd3c8b5",
         billing_address: {
-            email_address: email,
-            phone_number:"0743878261",
+            email_address: req.body.email,
+            phone_number: req.body.phone,
             country_code: "KE",
             first_name: "Ssenabulya",
             last_name: "Rahim",
@@ -91,12 +92,11 @@ app.post('/pay', async (req, res) => {
         );
         console.log("Pesapal response:", response.data);
         const {
-            redirect_url, 
-            order_tracking_id } = 
+            redirect_url, } = 
             response.data;
         console.log("Redirect user to:", redirect_url);
         res.json ({
-            redirect_url, order_tracking_id
+            redirect_url, order_tracking_id: orderID
         });
         
     } catch (error) {
@@ -140,11 +140,11 @@ app.post('/payment-callback', (req, res) => {
 
 // Route to get access token
 app.get('/token', async (req, res) => {
+    try{
     const token = await
     getPesapalToken();
-    if (token) {
         res.json({ token });
-    } else {
+    } catch (error) {
         res.status(500).json({ error: "Failed to get token"});
     }
 });
