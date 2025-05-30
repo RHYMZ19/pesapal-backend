@@ -106,14 +106,14 @@ app.post('/pay', async (req, res) => {
 });
 
 // check payment status
-app.get('/payment-status/:order_id', async (req, res) => {
+app.get('/payment-status/:order_tracking_id', async (req, res) => {
     const token = await getPesapalToken();
-    const orderID = req.params.order_id;
+    const orderID = req.params.order_tracking_id;
     
     try {
         const response = await axios.
         get(
-            `${PESAPAL_URL}/Transactions/GetTransactionStatus?
+            `${PESAPAL_URL}v3/api/Transactions/GetTransactionStatus?
             orderTrackingId=${orderID}`,
             {
                  headers:
