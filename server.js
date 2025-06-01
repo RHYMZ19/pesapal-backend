@@ -84,7 +84,7 @@ app.post('/pay', async (req, res) => {
         const response = await
         axios.post(`${PESAPAL_URL}/pesapalv3/api/Transactions/SubmitOrderRequest`,
             payload, {
-                headers: {'Authorization': `Bearer ${accessToken}`,
+                headers: {Authorization: `Bearer ${accessToken}`,
                 'Accept': 'application/json',
             "Content-Type": 
         "application/json"}
@@ -122,7 +122,7 @@ app.get('/payment-callback', async (req, res) => {
             orderTrackingId=${OrderTrackingId}`,
             {
                  headers:
-                 { 'Authorization': `Bearer ${token}`}
+                 { Authorization: `Bearer ${token}`}
             }
         );
         res.json({
