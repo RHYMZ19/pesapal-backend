@@ -16,6 +16,7 @@ const consumerKey = process.env.PESAPAL_CONSUMER_KEY;
 const consumerSecret = process.env.PESAPAL_CONSUMER_SECRET;
 const callbackURL =  process.env.PESAPAL_CALLBACK_URL;
 const phone = "0743878261";
+const MERCHANT_REFERENCE_PREFIX = 'baby';
 
 let accessToken = '';
 let tokenExpiry = 0;
@@ -50,77 +51,84 @@ catch (error) {
 // create payment request.
 app.post('/pay', async (req, res) => {
     try{
-        const { amount, email, phone, orderTrackingId } = 
-        req.body;
-        if (!amount || !email || !phone) {
-            return
-            res.status(400).json({error: "Amount and email and phone are required"})
-        };
-    console.log('Recieved /pay request:', req.body);
+        
     const accessToken = await
     getPesapalToken();
-    const orderID = 'order' + Date.now();
-    const orderDetails = {
-        id: orderID,
-        currency: "USD",
+    const merchantReference = MERCHANT_REFERENCE_PREFIX + Date.now();
+    const payload = {
+        id: merchantReference,
+        currency: "KES",
         amount: req.body.amount,
-        description: "Buying coins in chat app",
+        description: req.body.description,
         callback_url: callbackURL,
+        redirect_mode: 'TOP_WINDOW',
         notification_id: "f1d363c3-d803-4529-b209-dbdfacd3c8b5",
+        branch: 'Main Branch',
         billing_address: {
             email_address: req.body.email,
             phone_number: req.body.phone,
             country_code: "KE",
-            first_name: "Ssenabulya",
-            last_name: "Rahim",
+            first_name: req.body.firstName || "Ssenabulya",
+            middle_name: req.body.middleName || "",
+            last_name: req.body.lastName || "Rahim",
             line_1: "Street 123",
+            line_2: '',
             city: "Kampala",
             state: "Central",
-            postal_code: "00100",
-            zip_code: "00100"
+            postal_code: "",
+            zip_code: ""
         }
     };
     
         
         const response = await
-        axios.post(`${PESAPAL_URL}/v3/api/Transactions/SubmitOrderRequest`,
-            orderDetails, {
-                headers: {Authorization: `Bearer ${accessToken}`,
+        axios.post(`${PESAPAL_URL}/pesapalv3/api/Transactions/SubmitOrderRequest`,
+            payload, {
+                headers: {'Authorization': `Bearer ${accessToken}`,
+                'Accept': 'application/json',
             "Content-Type": 
         "application/json"}
             }
         );
-        console.log("Pesapal response:", response.data);
-        const {
-            redirect_url, } = 
-            response.data;
-        console.log("Redirect user to:", redirect_url);
-        res.json ({
-            redirect_url, order_tracking_id: orderID
-        });
+        
+        if (response.status === 200 && response.data.redirect_url) {
+            res.json({
+                redirectUrl: response.data.redirect_url
+            });
+        } else {
+            res.status(500).json({ error: 'Payment initiation failed', details: response.data});
+        }
         
     } catch (error) {
-        console.error("Payment error:", error?.response?.data || error.message);
-        res.status(500).json({error: "Payment failed"});
+        console.error("SubmitOrderRequest error:", error.response?.data || error.message);
+        res.status(500).json({error: "Payment initiation failed", details: error.message});
     }
 });
 
 // check payment status
-app.get('/payment-status/:order_tracking_id', async (req, res) => {
-    const token = await getPesapalToken();
-    const orderID = req.params.order_tracking_id;
+app.get('/payment-callback', async (req, res) => {
+    const orderTrackingId = req.query.OrderTrackingId;
+
+    if (!orderTrackingId) return
+    res.status(400).send('Missing OrderTrackingId');
+    
+    
     
     try {
-        const response = await axios.
+        const token = await getPesapalToken();
+        const statusResponse = await axios.
         get(
             `${PESAPAL_URL}v3/api/Transactions/GetTransactionStatus?
-            orderTrackingId=${orderID}`,
+            orderTrackingId=${OrderTrackingId}`,
             {
                  headers:
-                 { Authorization: `Bearer ${token}`}
+                 { 'Authorization': `Bearer ${token}`}
             }
         );
-        res.json(response.data);
+        res.json({
+            message: 'Payment status fetched successfully',
+            status: statusResponse.data
+        });
     } catch (error) {
         console.error("Error checking transaction status:",
             error.response?.data || error.message
@@ -131,11 +139,30 @@ app.get('/payment-status/:order_tracking_id', async (req, res) => {
 
 
 // payment callback.
-app.post('/payment-callback', (req, res) => {
-    console.log('Received payment from pesapal:', req.body);
-    res.status(200).json({
-        message: 'IPN recieved successfully'
-    });
+app.post('/payment-ipn', async (req, res) => {
+    const {OrderTrackingId} = req.body;
+
+    if (!OrderTrackingId) return
+    res.status(400).send('Missing OrderTrackingId');
+
+    try {
+        const token = await getPesapalToken();
+
+        const statusResponse = await axios.get(
+            `${PESAPAL_URL}v3/api/Transactions/GetTransactionStatus?
+            orderTrackingId=${OrderTrackingId}`,
+            {
+                headers:
+                { 'Authorization': `Bearer ${token}`}
+           }
+        );
+
+        console.log('IPN payment status:', statusResponse.data);
+        res.status(200).send('OK');
+    } catch (error) {
+        console.error('IPN GetTransactionStatus error:', error.response?.data || error.message);
+        res.status(500).send('Error processing IPN');
+    }
 });
 
 // Route to get access token
