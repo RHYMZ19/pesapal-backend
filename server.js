@@ -82,10 +82,10 @@ app.post('/pay', async (req, res) => {
     
         
         const response = await
-        axios.post(`${PESAPAL_URL}/pesapalv3/api/Transactions/SubmitOrderRequest`,
+        axios.post(`${PESAPAL_URL}/v3/api/Transactions/SubmitOrderRequest`,
             payload, {
                 headers: {Authorization: `Bearer ${accessToken}`,
-                'Accept': 'application/json',
+                Accept: 'application/json',
             "Content-Type": 
         "application/json"}
             }
